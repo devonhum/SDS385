@@ -60,7 +60,7 @@ gradient_descent = function(alpha, iterations){
   return (beta)
 }
 
-#convert character data to binary (necessary for the matrix computation in this exercise)
+#convert character data to binary 
 as_binary = function(Y){
   for (i in 1:length(Y)){
     if (Y[i] == "B"){
@@ -71,6 +71,9 @@ as_binary = function(Y){
   }
   return (as.numeric(Y))
 }
+
+#Newton's method
+
 
 # Examples and implementation -------------------
 
@@ -87,13 +90,6 @@ Y = as_binary(Y)
 X = as.matrix(data[, 3:12])
 X = cbind(rep(1, nrow(X)), X) #add 1s to X, to deal with the intercept term
 
-#initialize beta vector
-init_beta = rep(0, nrow(t(X)))
-
-#evaluate likelihood on initial beta
-likelihood(init_beta)
-
-#set gradient descent parameters
-alpha <- 0.001
-iters <- 1500
+#calculate optimal beta via gradient descent
+beta_opt = gradient_descent(0.001, 10000)
 
