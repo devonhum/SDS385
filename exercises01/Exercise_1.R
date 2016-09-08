@@ -89,7 +89,8 @@ Y = as.matrix(data$M)
 Y = as_binary(Y)
 X = as.matrix(data[, 3:12])
 X = cbind(rep(1, nrow(X)), X) #add 1s to X, to deal with the intercept term
+init_beta = rep(0, nrow(t(X)))
 
 #calculate optimal beta via gradient descent
-beta_opt = gradient_descent(0.001, 10000)
+beta_opt = gradient_descent(0.001, 100)
 
