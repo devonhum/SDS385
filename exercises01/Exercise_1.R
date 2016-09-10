@@ -35,10 +35,10 @@ sigmoid = function(z){
 }
 
 #likelihood function
-likelihood = function(beta){
+likelihood = function(beta, X, y){
   m = nrow(X)
   g = sigmoid(beta %*% t(X))
-  J = -(1/m) * (Y%*%log(g)) + ((1-Y)%*%log(1 - g))
+  J = -(1/m) * (y %*% t(log(g))) + ((1 - y) %*% t(log(1 - g)))
   return(J)
 }
 
@@ -52,10 +52,9 @@ grad = function(y, X, beta){
 #gradient descent algorithm 
 gradient_descent = function(alpha, iterations){
   beta = rep(0, nrow(t(X)))
-  conv_diag = c()
   for (i in 1:iterations){
-    beta = beta - alpha * grad(y, X, beta)
-    conv_diag = c(conv_diag, likelihood(beta))
+    beta = beta - alpha * grad(Y, X, beta)
+    conv_diag <<- c(conv_diag, likelihood(beta, X, y))
   }
   return (beta)
 }
@@ -85,11 +84,13 @@ data$intercept <- rep(1, nrow(data)) #add column of ones for intercept offset
 plot(data$X17.99, data$X10.38, col = as.factor(data$M), xlab = "X17.99", ylab = "X10.38")
 
 #set predictor and response variables
-Y = as.matrix(data$M)
-Y = as_binary(Y)
+y = as.matrix(data$M)
+y = as_binary(Y)
 X = as.matrix(data[, 3:12])
 X = cbind(rep(1, nrow(X)), X) #add 1s to X, to deal with the intercept term
 init_beta = rep(0, nrow(t(X)))
+conv_diag = c()
+
 
 #calculate optimal beta via gradient descent
 beta_opt = gradient_descent(0.001, 100)
