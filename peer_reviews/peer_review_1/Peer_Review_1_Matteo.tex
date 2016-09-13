@@ -1,0 +1,63 @@
+\documentclass[12pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+
+%SetFonts
+
+%SetFonts
+
+
+\title{Peer Review - Matteo Vestrucci}
+\author{Devon Humphreys}
+\date{Monday, September 19, 2016}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+
+%\subsection{Math presentation and logic}
+
+
+%\subsection{R code presentation}
+
+%\section{The Nitty Gritty}
+%\subsection{Math arguments}
+\section{R code}
+Your R code is very elegant. A few comments that might help you improve the clarity and aesthetics: 
+\begin{enumerate}
+\item Use spaces around mathematical operators and the assignment operator (\textless-, =, +, -, *, \%*\%), etc. 
+\item Annotating your functions with a brief descriptor, and the input/output it takes/generates will make things easier for a reader who is not already familiar with what the functions should be, as I am. 
+\item Personal preference: I like to separate out variable assignments in functions from the math itself, for clarity and ease of reading. For example, see my annotated .R document.
+\item I like to see spaces after commas. It's more digestible and clearly delineated.
+\item I would recommend allowing yourself about 80 characters per line max. You tend to cut them off around 70, which is fine, but use the max space you can to keep things on a single line without going too far if you can.
+\item Stay concise. Instead of accuracy\_obj\_fun, you could get away with acc\_obj, for example. You'll be able to keep the initial function definition on a single line by shortening the longer variable names, if possible. On the one hand, it seems like a lot of unnecessary typing, and on the other, it's just not very pretty. We like pretty things. You can always use your annotations to define a variable if needed.
+
+\end{enumerate}
+
+I included an edited R script for you to review. Mostly, I have added spaces where I think necessary, and shortened some variable names for brevity. Feel free to take or leave whatever you like from these edits.
+
+
+\section{Report and Derivations}
+\subsection{LaTeX}
+Your LaTeX code is mostly excellent, although if you look at what you have currently written using \textbackslash begin\{lstlisting\}, you'll notice that R's operators change to blue text. This isn't a problem really, but if you'd like to keep it all in black, you could use the \textbackslash begin\{verbatim\} argument and then just copy and paste your code from R. This retains all the structure of your R code. Example using your code: 
+
+\begin{verbatim}
+
+negloglikelihood <- function(m, y, X, beta){ 
+  total <- 0
+  N <- length(y)
+  for (i in 1:N){
+    total <- total + (m[i] - y[i]) * t(X[i,]) %*% beta + m[i] * \\
+    log(1 + exp(-t(X[i,]) %*% beta))
+  }
+  return (total)
+}
+\end{verbatim}
+Be sure to include \textbackslash end\{verbatim\} after the block of code.
+
+
+\end{document}  
