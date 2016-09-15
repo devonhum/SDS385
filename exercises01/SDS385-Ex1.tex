@@ -1,0 +1,306 @@
+\documentclass{article}
+
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+\usepackage[usenames,dvipsnames]{color} % Required for custom colors
+\usepackage{graphicx} % Required to insert images
+\usepackage{amsmath}
+\usepackage{listings} % Required for insertion of code
+%\usepackage{couriernew} % Required for the courier font
+
+\usepackage{enumerate} % Required for enumerating with letters
+
+\title{Exercises 1: Preliminaries}
+\author{Devon Humphreys}
+\date{}  % if the \date{} command is left out, the current date will be used
+
+\lstset{frame=tb,
+  language=R,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  %commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=false,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+% These commands are used to pretty-print LaTeX commands
+\newcommand{\doccmd}[1]{\texttt{\textbackslash#1}}% command name -- adds backslash automatically
+\newcommand{\docopt}[1]{\ensuremath{\langle}\textrm{\textit{#1}}\ensuremath{\rangle}}% optional command argument
+\newcommand{\docarg}[1]{\textrm{\textit{#1}}}% (required) command argument
+\newenvironment{docspec}{\begin{quote}\noindent}{\end{quote}}% command specification environment
+\newcommand{\docenv}[1]{\textsf{#1}}% environment name
+\newcommand{\docpkg}[1]{\texttt{#1}}% package name
+\newcommand{\doccls}[1]{\texttt{#1}}% document class name
+\newcommand{\docclsopt}[1]{\texttt{#1}}% document class option name
+
+\newcommand{\N}{\mbox{N}}
+\newcommand{\thetahat}{\hat{\theta}}
+\newcommand{\sigmahat}{\hat{\sigma}}
+\newcommand{\betahat}{\hat{\beta}}
+
+
+\begin{document}
+\maketitle
+\section{Linear Weighted Regression}
+%\subsection{}
+
+Given a simple linear model
+
+\begin{align}
+	y = X\beta + \epsilon 
+\end{align}
+
+we wish to minimize the sum of squared residuals using the weighted least squares approach (WLS).
+
+
+
+(A) We are given the solution in scalar sums and products for $\hat{\beta}$ as 
+\begin{align}
+	{\hat{\beta}} = \arg \min_{\beta \in \mathcal{R}^P} \sum_{i=1}^N \frac{w_i}{2}(y_i - x_i^T \beta)^2 \, .
+\end{align} 
+
+We wish to rewrite this optimization problem in terms of matrix algebra. This will give us the normal equations of linear least squares regression. 
+
+Recognize that: 
+
+\begin{align}
+	\frac{1}{2} \sum_{i=1}^Nw_i(y_i - x_i^T\beta)^2 & = \frac{1}{2}\sum_{i=1}^N(y_i - x_i^T\beta)w_i(y_i - x_i^T\beta) \\
+	& = \frac{1}{2}\sum_{i=1}^N(y_iw_iy_i - 2y_iw_ix_i^T\beta + x_i^T\beta w_ix_i^T\beta) \\	
+	& = \frac{1}{2}(y^T W y) - 2(y^T W X \beta) + ((X\beta)^T W (X\beta)). 
+\end{align}
+
+Taking the partial derivative with respect to $\beta$ and setting this to 0, we can find the optimal solution of this system of linear equations. 
+
+\begin{align}
+	\nabla_{\beta} 
+	  &= \frac{1}{2}\{\nabla_{\beta}{y^T W y} - 2\nabla_{\beta}{y^T W X \beta} + \nabla_{\beta} {(X\beta)^T W (X\beta)}\} \\	0 &= \frac{1}{2} \{ 0 - 2{y^T W X} + 2 {X^T W X\beta} \} \\
+	0 &= {-y^TWX} + {X^TWX\beta}\\
+		 -{X^TWX\beta} &= -{X^TWy}\\
+	  \hat{\beta} & = ({X^TWX})^{-1} {X^TWy}	  
+\end{align}
+
+
+
+(B) The inversion method in the normal equations is not the fastest or most numerically stable way to solve a general system of linear equations as in the case of linear regression. Another class of methods rely on orthogonal decomposition. Such methods include (1) Cholesky factorization; (2) QR decomposition; and (3) singular value decomposition (SVD).
+
+\begin{enumerate}
+%
+%
+\item Cholesky Decomposition: the fastest of the three methods, but numerically unstable (that is, it suffers from underflow/overflow problems in floating point representation). 
+\item QR Decomposition: kind of a middle ground; a bit slower, but still fast and more numerically stable. 
+\item SVD: slowest, but the most numerically stable; especially useful for rank deficient matrices. 
+%
+%
+\end{enumerate}
+
+Pseudocode for QR decomposition: 
+
+\begin{align}
+	{X^TWy} = {X^TWX\beta}\, 
+\end{align}
+
+Recognize that 
+
+\begin{align}
+	{W^{\frac{1}{2}}X} = {QR}\, , 
+\end{align} 
+
+where Q  is orthonormal and R is a right triangular matrix.
+
+Then 
+
+\begin{align}
+	{X^TW^{\frac{1}{2}}W^{{1}{2}}y} &= {X^TW^{\frac{1}{2}}W^{\frac{1}{2}}X\beta} \\ 
+	{(QR)^T W^{\frac{1}{2}}y} &= {(QR)^T QR\beta}\\ 
+	{R^TQ^TW^{\frac{1}{2}}y} &= {R^TQ^TQR\beta}\\
+	{Q^T W^{\frac{1}{2}}y} &= {R\beta} 	
+\end{align}
+
+
+Pseudocode for SVD: 
+
+We will factor the design matrix ${X}$ into orthogonal components and a diagonal matrix containing the "singular values":
+
+\begin{align}
+	{X} = {U\Sigma V^T}
+\end{align}
+
+${U}$ and ${V}$ are orthogonal matrices, and ${\Sigma}$  is a diagonal matrix whose off-diagonal elements are 0.
+
+Then we recognize that 
+
+\begin{align}
+	\hat{\beta} &= (X^T WX)^{-1} X^T W y \\
+	&= ((U\Sigma V^T)^T WU\Sigma V^T)^{-1} (U\Sigma V^T) Wy
+\end{align}
+
+...
+
+
+(C) R code for Linear Weighted Regression
+
+\begin{lstlisting}
+
+library(microbenchmark)
+library(Matrix)
+
+## inversion method
+
+# the matrix X contains our explanatory variables in y = Xb + e
+
+inversion_solver <- function (n_obs, n_vars) {
+  # create a random matrix for demonstration
+  X <- rnorm(n_obs * n_vars, mean = 0, sd = 1)
+  X <- matrix(X, nrow = n_obs, ncol = n_vars)
+  
+  # generate the vector y to be regressed on X
+  y <- rnorm(n_obs, mean = 0, sd = 1)
+  
+  # solve the least squares problem using the inversion method 
+  b <- solve(t(X) %*% X) %*% t(X) %*% y
+  
+  return (b)
+}
+
+## QR method
+
+qr_solver <- function (n_obs, n_vars) {
+  # generate a random feature matrix X
+  X <- rnorm(n_obs * n_vars, mean = 0, sd = 1)
+  X <- matrix(X, nrow = n_obs, ncol = n_vars)
+  
+  # generate an observation vector y
+  y <- rnorm(n_obs, mean = 0, sd = 1)
+  y <- matrix(y, nrow = n_obs, ncol = n_vars)
+  
+  # solve the least squares problem using QR decomposition of X
+  b <- qr.solve(X, y)
+  return (b)
+}
+
+## Dealing with sparse matrices in R
+
+inversion_sparse <- function (n_obs, n_vars, sparsity) {
+  # define a random feature matrix X with sparsity of 95%
+  X <- rnorm(n_obs * n_vars, mean = 0, sd = 1)
+  X <- matrix(X, nrow = n_obs, ncol = n_vars)
+  mask <- matrix(rbinom(n_obs * n_vars, 1, sparsity), nrow = n_obs)
+  X <- X * mask
+  X <- Matrix(X, sparse = T) # converts to sparse format
+  
+  # generate random observations in a vector y
+  y <- rnorm(n_obs, mean = 1, sd = 1)
+  
+  # solve the least squares problem taking advantage of the sparse matrix format
+  inv_mat <- solve(t(X) %*% X, sparse = T)
+  b <- inv_mat %*% t(X) %*% y
+  return (b)
+}
+
+## benchmarking the dense matrix solvers on increasing number of variables
+var100 <- microbenchmark(inversion_solver(200, 100), qr_solver(200, 100), times = 10); var100
+var1000 <- microbenchmark(inversion_solver(2000, 1000), qr_solver(2000, 1000), times = 10); var1000
+var2000 <- microbenchmark(inversion_solver(5000, 2000), qr_solver(5000, 200), times = 10); var2000
+var5000 <- microbenchmark(inversion_solver(2000, 5000), qr_solver(2000, 5000), times = 10); var5000
+
+## benchmarking the sparse matrix solvers on increasing levels of sparsity and dimension
+#sp05 <- microbenchmark(inversion_sparse(150, 50), inversion_solver(150, 50), times = 10); sp05
+
+\end{lstlisting}
+
+(D) Consider the efficiency and stability of the above methods, but where X is a highly sparse rectangular matrix. Write an additional solver that can exploit the sparsity of A in a linear system ${Ax = b}$. 
+
+QR decomposition is the most efficient and appropriate way to handle this problem. We first store the sparse matrix X in a sparse matrix format using the Matrix library in R, as: 
+
+\begin{lstlisting}
+X = Matrix(X, sparse = T)
+\end{lstlisting}
+
+We find that it is represented in 122567 bytes compared to the 1600200 bytes for the normal storage wasting space on 0 entries. We then recall our QR algorithm for solving for $\hat{\beta}$ as 
+
+\begin{align}
+	{R^{-1}Q^T W^{\frac{1}{2}} y = \hat{\beta}}
+\end{align}
+
+Letting ${W = I}$, we have that
+
+\begin{align}
+	{R^{-1}Q^T y = \hat{\beta}}
+\end{align}
+
+\section{Generalized Linear Models}
+(A) We are given the general form of the negative log likelihood, 
+
+\begin{align}
+	l(\beta) = -\ln\prod_{i = 1}^N p(y_i | \beta)\, 
+\end{align}
+
+Our task is to write the full likelihood for a binomial model using the logistic link function. The model for a single Bernoulli trial is 
+
+\begin{align} 
+	p^n (1 - p)^{1-n}\, 
+\end{align}
+
+First, let 
+
+\begin{align} 
+	w_i = \frac{1}{1 + \exp(-x_i\beta)} \,
+\end{align}
+
+Note that: 
+
+\begin{align} 
+	1 - w_i &= 1 - \frac{1}{1 + \exp(-x_i\beta)} \\
+	 &= \frac{1 + \exp(-x_i\beta)}{1 + \exp(-x_i\beta)} - \frac{1}{1 + \exp(-x_i\beta)} \\
+	 &= \frac{\exp(-x_i\beta)}{1 + \exp(-x_i\beta)}
+\end{align}
+
+The critical part of solving the gradient of this equation with respect to $\beta$ is to find the gradient $\nabla_{\beta} w_i$. This is
+
+\begin{align}
+	\nabla_{\beta}w_i = \nabla_{\beta} \frac{1}{1 + \exp(-x_i\beta)}
+\end{align}
+
+By the quotient rule of derivatives, we have that 
+
+\begin{align}
+	\nabla_{\beta} &= \frac{-\nabla_{\beta}(1 + \exp(-x_i\beta)}{(1 + \exp(-x_i\beta)^2}\\
+	&= \frac{x_i \exp(-x_i\beta}{(1 + \exp(-x_i\beta)^2} \\
+	&= \frac{1}{1 + \exp(-x_i\beta)}\frac{\exp(-x_i\beta)}{1 + \exp(-x_i\beta)} x_i \\
+	&= w_i (1 - w_i) x_i . 
+\end{align}
+
+
+We can use this in our solution to the full gradient $\nabla_{\beta} l(\beta)$ .
+
+\begin{align}
+	\nabla_{\beta} l(\beta) &= -\nabla_{\beta}\sum_{i = 1}^N y_i ln(w_i) + (m_i - y_i) ln (1 - w_i) \\
+	&= -\sum_{i = 1}^N y_i \nabla_{\beta} ln(w_i) + (m_i - y_i) \nabla_{\beta}ln(1 - w_i) \\
+	&= -\sum_{i = 1}^N y_i \frac{1}{w_i}\nabla_{\beta}w_i + (m_i - y_i) \frac{1}{1 - w_i} \nabla_{\beta}(1 - w_i)\\
+	&= -\sum_{i = 1}^N y_i \frac{1}{w_i} w_i (1 - w_i)x_i - (m_i - y_i) \frac{1}{1 - w_i} w_i (1 - w_i) x_i \\
+	&= -\sum_{i = 1}^N y_i (1 - w_i)x_i - (m_i - y_i) w_i x_i \\
+	&= -\sum_{i = 1}^N y_i x_i - y_i w_i x_i -m_i w_i x_i + y_i w_i x_i \\
+	&= -\sum_{i = 1}^N y_i x_i - m_i w_i x_i \\
+	&= -\sum_{i = 1}^N (y_i - m_i w_i) x_i \\
+	&= -{(y - M W)^T X}
+\end{align}
+
+
+\section{R code for GLM}
+\begin{lstlisting}
+
+
+
+\end{lstlisting}
+
+\end{document}  
